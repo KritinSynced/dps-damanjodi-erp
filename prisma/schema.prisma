@@ -1,0 +1,197 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id           String         @id @default(uuid())
+  email        String         @unique
+  passwordHash String
+  role         String         // "STUDENT" | "PARENT" | "TEACHER" | "ADMIN"
+  name         String
+  avatar       String?        // URL or base64
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  
+  // Relations
+  student      Student?
+  parent       Parent?
+  teacher      Teacher?
+  announcements Announcement[]
+  leaveRequests LeaveRequest[]
+}
+
+model Student {
+  id                String       @id @default(uuid())
+  userId            String       @unique
+  admissionNo       String       @unique
+  class             String       // e.g. "10"
+  section           String       // e.g. "A"
+  rollNo            Int
+  dateOfBirth       DateTime
+  gender            String
+  phone             String?
+  address           String
+  bloodGroup        String?
+  cardQrCode        String?
+  libraryCardNo     String?
+  
+  // Parent Relation
+  parentId          String
+  parent            Parent       @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  
+  // Transport Relation
+  transportRouteId  String?
+  transportStop     String?
+  transportRoute    BusRoute?    @relation(fields: [transportRouteId], references: [id], onDelete: SetNull)
+
+  // System Relations
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attendance        Attendance[]
+  grades            Grade[]
+  feePayments       FeePayment[]
+  bookIssues        BookIssue[]
+}
+
+model Parent {
+  id             String    @id @default(uuid())
+  userId         String    @unique
+  occupation     String?
+  relation       String    // "FATHER" | "MOTHER" | "GUARDIAN"
+  phone          String
+  alternatePhone String?
+  address        String
+
+  // Relations
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  students       Student[]
+}
+
+model Teacher {
+  id                    String   @id @default(uuid())
+  userId                String   @unique
+  employeeId            String   @unique
+  department            String   // e.g. "Science", "Mathematics"
+  qualification         String   // e.g. "M.Sc, B.Ed"
+  joinDate              DateTime @default(now())
+  phone                 String
+  classTeacherOfClass   String?  // If class teacher, e.g. "10"
+  classTeacherOfSection String?  // If class teacher, e.g. "A"
+
+  // Relations
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Attendance {
+  id         String   @id @default(uuid())
+  studentId  String
+  date       DateTime
+  status     String   // "PRESENT" | "ABSENT" | "LATE" | "HALF_DAY"
+  subject    String?  // Optional subject-specific attendance
+  markedById String?  // ID of the teacher who marked it
+
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, date, subject])
+}
+
+model Grade {
+  id             String   @id @default(uuid())
+  studentId      String
+  subject        String   // e.g. "Mathematics", "Science"
+  examType       String   // "UNIT_1" | "UNIT_2" | "MID_TERM" | "FINAL"
+  theoryMarks    Float
+  practicalMarks Float    @default(0.0)
+  totalMarks     Float
+  maxMarks       Float
+  grade          String   // "A1" | "A2" | "B1" | "B2" etc.
+  term           String   // "Term 1" | "Term 2"
+  academicYear   String   // e.g. "2025-2026"
+  createdAt      DateTime @default(now())
+
+  student        Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model FeePayment {
+  id            String    @id @default(uuid())
+  studentId     String
+  title         String    // e.g. "Q1 Tuition Fee"
+  amount        Float
+  dueDate       DateTime
+  status        String    // "PAID" | "UNPAID" | "OVERDUE"
+  paidDate      DateTime?
+  paymentMethod String?   // "UPI" | "CARD" | "NET_BANKING"
+  transactionId String?
+  receiptNo     String?   @unique
+
+  student       Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Book {
+  id              String      @id @default(uuid())
+  title           String
+  author          String
+  isbn            String      @unique
+  category        String      // e.g. "Science", "Literature"
+  totalCopies     Int
+  availableCopies Int
+  location        String      // Shelf location, e.g. "A-12"
+  
+  bookIssues      BookIssue[]
+}
+
+model BookIssue {
+  id         String    @id @default(uuid())
+  bookId     String
+  studentId  String
+  issueDate  DateTime  @default(now())
+  dueDate    DateTime
+  returnDate DateTime?
+  status     String    // "ISSUED" | "RETURNED" | "OVERDUE"
+  fineAmount Float     @default(0.0)
+
+  book       Book      @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  student    Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model BusRoute {
+  id          String    @id @default(uuid())
+  routeName   String    // e.g. "Route 1: Damanjodi Sector 1"
+  vehicleNo   String    // e.g. "OD-10-B-1234"
+  driverName  String
+  driverPhone String
+  stops       String    // JSON string of stops
+  coordinates String    // JSON string of GPS coordinates for tracking simulation
+
+  students    Student[]
+}
+
+model Announcement {
+  id         String   @id @default(uuid())
+  title      String
+  content    String
+  targetRole String   // "ALL" | "STUDENT" | "TEACHER" | "PARENT"
+  category   String   // "ACADEMIC" | "EVENT" | "GENERAL" | "URGENT"
+  date       DateTime @default(now())
+  authorId   String
+
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model LeaveRequest {
+  id          String   @id @default(uuid())
+  userId      String
+  role        String   // "STUDENT" | "TEACHER" | "PARENT"
+  startDate   DateTime
+  endDate     DateTime
+  reason      String
+  status      String   // "PENDING" | "APPROVED" | "REJECTED"
+  comments    String?
+  appliedDate DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}

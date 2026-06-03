@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32">
+  <circle cx="50" cy="50" r="46" stroke="#0B7A3B" stroke-width="4" fill="#ffffff" />
+  <circle cx="50" cy="50" r="40" stroke="#f2a900" stroke-width="1.5" fill="none" />
+  <path d="M 38 68 C 42 66, 45 66, 48 68 C 50 70, 52 73, 50 76 C 47 79, 42 79, 39 77 Z" fill="#0B7A3B" />
+  <path d="M 35 55 C 35 50, 65 50, 65 55 C 65 60, 35 60, 35 55 Z" fill="#f2a900" stroke="#0B7A3B" stroke-width="1.5" />
+  <path d="M 40 57 C 40 68, 60 68, 60 57 Z" fill="#f2a900" stroke="#0B7A3B" stroke-width="1.5" />
+  <path d="M 50 36 C 45 42, 47 49, 50 49 C 53 49, 55 42, 50 36 Z" fill="#ff6b00" />
+  <path d="M 50 40 C 47 44, 48 48, 50 48 C 52 48, 53 44, 50 40 Z" fill="#ffb300" />
+  <path d="M 28 32 C 38 25, 62 25, 72 32 C 72 55, 50 68, 50 68 C 50 68, 28 55, 28 32 Z" stroke="#0B7A3B" stroke-width="2.5" stroke-linejoin="round" fill="none" opacity="0.85" />
+  <text x="50" y="23" text-anchor="middle" font-size="10" font-weight="900" fill="#0B7A3B" font-family="system-ui, sans-serif">DPS</text>
+</svg>
