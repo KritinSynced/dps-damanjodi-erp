@@ -99,14 +99,14 @@ export default function LoginPage() {
             <div className="space-y-1">
               <div className="flex justify-between items-center">
                 <label className="text-xs font-bold text-slate-400">Password</label>
-                <a href="#" className="text-[10px] text-primary hover:underline">Forgot password?</a>
+                <a href="#" className="text-[10px] text-secondary hover:underline">Forgot password?</a>
               </div>
               <input
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full text-sm border border-slate-700 bg-slate-900 rounded p-2.5 focus:ring focus:outline-none text-white"
+                className="w-full text-sm border border-slate-700 bg-slate-900 rounded p-2.5 focus:ring focus:outline-none text-white animate-transition"
                 placeholder="••••••••"
               />
             </div>
@@ -114,7 +114,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-primary hover:bg-primary-hover text-white py-3 rounded-md font-bold text-sm shadow transition-colors flex items-center justify-center gap-2 cursor-pointer mt-2"
+              className="w-full bg-primary hover:bg-emerald-700 text-white py-3 rounded-md font-bold text-sm shadow transition-colors flex items-center justify-center gap-2 cursor-pointer mt-2"
             >
               <LogIn size={16} />
               {isSubmitting ? "Authenticating Session..." : "Secure Login"}
@@ -132,32 +132,32 @@ export default function LoginPage() {
                 onClick={() => autofill("admin@dpsdamanjodi.edu.in", "admin123")}
                 className="bg-slate-900/50 hover:bg-slate-900 border border-slate-700 text-left px-3 py-2 rounded text-[11px] text-slate-300 hover:text-white transition-colors cursor-pointer"
               >
-                <div className="font-bold text-slate-400 leading-none">Admin</div>
-                <div className="text-[9px] text-slate-500 mt-1 select-none leading-none">sujata.mohapatra</div>
+                <div className="font-bold text-slate-200 leading-none">Admin</div>
+                <div className="text-[10px] text-slate-400 mt-1 select-none leading-none">sujata.mohapatra</div>
               </button>
               <button
                 type="button"
                 onClick={() => autofill("teacher@dpsdamanjodi.edu.in", "teacher123")}
                 className="bg-slate-900/50 hover:bg-slate-900 border border-slate-700 text-left px-3 py-2 rounded text-[11px] text-slate-300 hover:text-white transition-colors cursor-pointer"
               >
-                <div className="font-bold text-slate-400 leading-none">Teacher</div>
-                <div className="text-[9px] text-slate-500 mt-1 select-none leading-none">sunita.sharma</div>
+                <div className="font-bold text-slate-200 leading-none">Teacher</div>
+                <div className="text-[10px] text-slate-400 mt-1 select-none leading-none">sunita.sharma</div>
               </button>
               <button
                 type="button"
                 onClick={() => autofill("student@dpsdamanjodi.edu.in", "student123")}
                 className="bg-slate-900/50 hover:bg-slate-900 border border-slate-700 text-left px-3 py-2 rounded text-[11px] text-slate-300 hover:text-white transition-colors cursor-pointer"
               >
-                <div className="font-bold text-slate-400 leading-none">Student</div>
-                <div className="text-[9px] text-slate-500 mt-1 select-none leading-none">rahul.mohanty</div>
+                <div className="font-bold text-slate-200 leading-none">Student</div>
+                <div className="text-[10px] text-slate-400 mt-1 select-none leading-none">rahul.mohanty</div>
               </button>
               <button
                 type="button"
                 onClick={() => autofill("parent@dpsdamanjodi.edu.in", "parent123")}
                 className="bg-slate-900/50 hover:bg-slate-900 border border-slate-700 text-left px-3 py-2 rounded text-[11px] text-slate-300 hover:text-white transition-colors cursor-pointer"
               >
-                <div className="font-bold text-slate-400 leading-none">Parent</div>
-                <div className="text-[9px] text-slate-500 mt-1 select-none leading-none">ramesh.mohanty</div>
+                <div className="font-bold text-slate-200 leading-none">Parent</div>
+                <div className="text-[10px] text-slate-400 mt-1 select-none leading-none">ramesh.mohanty</div>
               </button>
             </div>
           </div>

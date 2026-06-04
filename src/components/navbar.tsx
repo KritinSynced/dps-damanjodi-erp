@@ -52,7 +52,7 @@ export default function Navbar() {
   return (
     <header
       className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled
+        isScrolled || isOpen
           ? "bg-background/95 backdrop-blur-md border-b shadow-sm"
           : "bg-transparent"
       }`}
@@ -61,7 +61,7 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-20">
           {/* Logo Section */}
           <Link href="/" className="flex items-center">
-            <DPSLogo size={52} showText={true} />
+            <DPSLogo size={52} showText={true} variant={(isScrolled || isOpen) ? "color" : "dark"} />
           </Link>
 
           {/* Desktop Navigation */}
@@ -70,17 +70,21 @@ export default function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  isActive(link.href)
-                    ? "text-primary border-b-2 border-primary pb-1"
-                    : "text-muted-foreground"
+                className={`text-sm font-medium transition-colors ${
+                  (isScrolled || isOpen)
+                    ? isActive(link.href)
+                      ? "text-primary border-b-2 border-primary pb-1"
+                      : "text-muted-foreground hover:text-primary"
+                    : isActive(link.href)
+                      ? "text-secondary border-b-2 border-secondary pb-1"
+                      : "text-slate-200 hover:text-white"
                 }`}
               >
                 {link.label}
               </Link>
             ))}
 
-            <div className="border-l pl-6 h-6 border-muted flex items-center">
+            <div className={`border-l pl-6 h-6 flex items-center ${(isScrolled || isOpen) ? "border-muted" : "border-slate-800"}`}>
               {user ? (
                 <Link
                   href={`/portal/${user.role.toLowerCase()}`}
@@ -106,7 +110,11 @@ export default function Navbar() {
           <div className="flex lg:hidden items-center">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-muted-foreground hover:text-foreground focus:outline-none p-2 rounded-md hover:bg-muted"
+              className={`focus:outline-none p-2 rounded-md transition-colors ${
+                (isScrolled || isOpen)
+                  ? "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  : "text-slate-200 hover:text-white hover:bg-slate-800/40"
+              }`}
             >
               {isOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
