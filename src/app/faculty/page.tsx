@@ -54,7 +54,7 @@ export default async function FacultyPage() {
                 />
               </div>
               <div>
-                <h4 className="font-bold text-base leading-tight">Shri P.K. Sahu</h4>
+                <h4 className="font-bold text-base leading-tight">Shrimati Sujata Pani</h4>
                 <span className="text-xs font-semibold text-primary uppercase">Principal</span>
               </div>
               <p className="text-xs text-muted-foreground leading-relaxed">
