@@ -1,5 +1,6 @@
 import os
 import uuid
+import random
 from datetime import datetime, timedelta
 import bcrypt
 import jwt
@@ -15,6 +16,14 @@ router = APIRouter()
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID") or ""
 ADMIN_REGISTRATION_KEY = "dps_admin_2026"
+
+# In-memory stores for Captcha and OTP
+temp_captcha_store = {}  # captcha_id -> { "answer": int, "expires_at": datetime }
+temp_otp_store = {}      # email -> { "otp": str, "expires_at": datetime, "user": dict }
+
+def is_expired(expires_at: datetime) -> bool:
+    return datetime.utcnow() > expires_at
+
 
 def create_jwt_token(payload: dict) -> str:
     expire = datetime.utcnow() + timedelta(days=7)
@@ -53,8 +62,77 @@ def get_session_user(db, user: dict) -> dict:
             
     return session_user
 
+def verify_captcha_helper(payload: dict):
+    captcha_id = payload.get("captchaId")
+    captcha_answer = payload.get("captchaAnswer")
+    
+    if not captcha_id or captcha_answer is None:
+        raise HTTPException(status_code=400, detail="Missing Captcha response")
+        
+    captcha_record = temp_captcha_store.get(captcha_id)
+    if not captcha_record or is_expired(captcha_record["expires_at"]):
+        if captcha_id in temp_captcha_store:
+            del temp_captcha_store[captcha_id]
+        raise HTTPException(status_code=400, detail="Captcha expired. Please request a new one.")
+        
+    try:
+        user_answer = int(captcha_answer)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Captcha answer must be a number")
+        
+    if user_answer != captcha_record["answer"]:
+        if captcha_id in temp_captcha_store:
+            del temp_captcha_store[captcha_id]
+        raise HTTPException(status_code=400, detail="Incorrect Captcha answer")
+        
+    # Clear verified captcha so it cannot be reused
+    del temp_captcha_store[captcha_id]
+
+def issue_otp_helper(user: dict) -> dict:
+    email = user["email"]
+    otp = f"{random.randint(100000, 999999)}"
+    expires_at = datetime.utcnow() + timedelta(minutes=5)
+    
+    temp_otp_store[email] = {
+        "otp": otp,
+        "expires_at": expires_at,
+        "user": dict(user)
+    }
+    
+    print("\n" + "="*50)
+    print(f" SECURITY OTP GENERATED FOR {email} ")
+    print(f" OTP: {otp} ")
+    print("="*50 + "\n")
+    
+    return {
+        "success": True,
+        "otpRequired": True,
+        "email": email
+    }
+
+@router.get("/captcha")
+def get_captcha():
+    num1 = random.randint(1, 15)
+    num2 = random.randint(1, 15)
+    answer = num1 + num2
+    captcha_id = str(uuid.uuid4())
+    
+    expires_at = datetime.utcnow() + timedelta(minutes=5)
+    temp_captcha_store[captcha_id] = {
+        "answer": answer,
+        "expires_at": expires_at
+    }
+    
+    return {
+        "success": True,
+        "captchaId": captcha_id,
+        "question": f"What is {num1} + {num2}?"
+    }
+
 @router.post("/login")
 def login(payload: dict, db = Depends(get_db)):
+    verify_captcha_helper(payload)
+    
     email = payload.get("email")
     password = payload.get("password")
     
@@ -82,13 +160,12 @@ def login(payload: dict, db = Depends(get_db)):
     if not is_match:
         raise HTTPException(status_code=401, detail="Invalid email or password")
         
-    session_user = get_session_user(db, user)
-    token = create_jwt_token(session_user)
-    
-    return {"success": True, "token": token, "user": session_user}
+    return issue_otp_helper(user)
 
 @router.post("/google")
 def google_auth(payload: dict, db = Depends(get_db)):
+    verify_captcha_helper(payload)
+    
     credential = payload.get("credential")
     if not credential:
         raise HTTPException(status_code=400, detail="Google credentials missing")
@@ -119,14 +196,7 @@ def google_auth(payload: dict, db = Depends(get_db)):
             # Refetch user
             user = db.execute(user_query, {"google_id": google_id, "email": email}).mappings().first()
             
-        session_user = get_session_user(db, user)
-        token = create_jwt_token(session_user)
-        return {
-            "success": True,
-            "requiresRoleSelection": False,
-            "token": token,
-            "user": session_user
-        }
+        return issue_otp_helper(user)
     else:
         return {
             "success": True,
@@ -136,6 +206,33 @@ def google_auth(payload: dict, db = Depends(get_db)):
             "avatar": avatar,
             "googleId": google_id
         }
+
+@router.post("/verify-otp")
+def verify_otp(payload: dict, db = Depends(get_db)):
+    email = payload.get("email")
+    otp = payload.get("otp")
+    
+    if not email or not otp:
+        raise HTTPException(status_code=400, detail="Missing email or OTP")
+        
+    otp_record = temp_otp_store.get(email)
+    if not otp_record or is_expired(otp_record["expires_at"]):
+        if email in temp_otp_store:
+            del temp_otp_store[email]
+        raise HTTPException(status_code=400, detail="OTP expired or invalid. Please login again.")
+        
+    if otp_record["otp"] != otp:
+        raise HTTPException(status_code=400, detail="Incorrect OTP code")
+        
+    # Clear verified OTP
+    del temp_otp_store[email]
+    
+    user = otp_record["user"]
+    session_user = get_session_user(db, user)
+    token = create_jwt_token(session_user)
+    
+    return {"success": True, "token": token, "user": session_user}
+
 
 @router.post("/register-role")
 def register_role(payload: dict, db = Depends(get_db)):

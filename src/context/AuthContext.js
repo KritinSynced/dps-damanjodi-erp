@@ -53,18 +53,22 @@ export function AuthProvider({ children }) {
     setIsLoading(false);
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (email, password, captchaId, captchaAnswer) => {
     setIsLoading(true);
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, captchaId, captchaAnswer }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
+        if (data.otpRequired) {
+          setIsLoading(false);
+          return { success: true, otpRequired: true, email: data.email };
+        }
         const sessionUser = data.user;
         setUser(sessionUser);
         localStorage.setItem("dps_session", JSON.stringify(sessionUser));
@@ -73,7 +77,7 @@ export function AuthProvider({ children }) {
         return { success: true };
       } else {
         setIsLoading(false);
-        return { success: false, error: data.error || "Invalid credentials" };
+        return { success: false, error: data.error || data.detail || "Invalid credentials" };
       }
     } catch (err) {
       setIsLoading(false);
@@ -81,18 +85,22 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const loginWithGoogle = async (googleCredential) => {
+  const loginWithGoogle = async (googleCredential, captchaId, captchaAnswer) => {
     setIsLoading(true);
     try {
       const response = await fetch("/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credential: googleCredential }),
+        body: JSON.stringify({ credential: googleCredential, captchaId, captchaAnswer }),
       });
 
       const data = await response.json();
 
       if (response.ok && data.success) {
+        if (data.otpRequired) {
+          setIsLoading(false);
+          return { success: true, otpRequired: true, email: data.email };
+        }
         if (data.requiresRoleSelection) {
           // Save temp details to session storage
           sessionStorage.setItem(
@@ -118,11 +126,39 @@ export function AuthProvider({ children }) {
         }
       } else {
         setIsLoading(false);
-        return { success: false, error: data.error || "Google Sign-In failed" };
+        return { success: false, error: data.error || data.detail || "Google Sign-In failed" };
       }
     } catch (err) {
       setIsLoading(false);
       return { success: false, error: "An error occurred connecting to Google Auth" };
+    }
+  };
+
+  const verifyOtp = async (email, otp) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/auth/verify-otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, otp }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        const sessionUser = data.user;
+        setUser(sessionUser);
+        localStorage.setItem("dps_session", JSON.stringify(sessionUser));
+        localStorage.setItem("dps_token", data.token);
+        setIsLoading(false);
+        return { success: true };
+      } else {
+        setIsLoading(false);
+        return { success: false, error: data.error || data.detail || "Invalid OTP code" };
+      }
+    } catch (err) {
+      setIsLoading(false);
+      return { success: false, error: "An error occurred verifying OTP. Please try again." };
     }
   };
 
@@ -134,7 +170,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, loginWithGoogle, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, loginWithGoogle, verifyOtp, logout }}>
       {children}
     </AuthContext.Provider>
   );
