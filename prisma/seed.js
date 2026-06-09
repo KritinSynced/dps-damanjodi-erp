@@ -43,59 +43,15 @@ async function main() {
   await prisma.announcement.deleteMany({});
   await prisma.bookIssue.deleteMany({});
   await prisma.book.deleteMany({});
-  await prisma.feePayment.deleteMany({});
   await prisma.grade.deleteMany({});
   await prisma.attendance.deleteMany({});
   await prisma.student.deleteMany({});
   await prisma.teacher.deleteMany({});
   await prisma.parent.deleteMany({});
   await prisma.user.deleteMany({});
-  await prisma.busRoute.deleteMany({});
 
   console.log('Seeding database tables...');
 
-  // --- 1. BUS ROUTES ---
-  const route1 = await prisma.busRoute.create({
-    data: {
-      routeName: 'Route 1: Sector 1 & Sector 2 Township',
-      vehicleNo: 'OD-10-B-2345',
-      driverName: 'Sanjay Kumar Patra',
-      driverPhone: '+91 94371 23456',
-      stops: JSON.stringify([
-        { name: 'Nalco Township Gate 1', time: '07:15 AM' },
-        { name: 'Sector 1 Main Chowk', time: '07:25 AM' },
-        { name: 'Sector 2 Shopping Complex', time: '07:35 AM' },
-        { name: 'DPS School Campus', time: '07:50 AM' }
-      ]),
-      coordinates: JSON.stringify([
-        { lat: 18.7770, lng: 83.0010 },
-        { lat: 18.7785, lng: 83.0030 },
-        { lat: 18.7800, lng: 83.0055 },
-        { lat: 18.7820, lng: 83.0080 }
-      ])
-    }
-  });
-
-  const route2 = await prisma.busRoute.create({
-    data: {
-      routeName: 'Route 2: Nalco Hill Top & Mathalput',
-      vehicleNo: 'OD-10-B-8765',
-      driverName: 'Rajendra Prasad Naik',
-      driverPhone: '+91 94378 87654',
-      stops: JSON.stringify([
-        { name: 'Mathalput Junction', time: '07:10 AM' },
-        { name: 'Hill Top Township Block A', time: '07:25 AM' },
-        { name: 'Hill Top Market Complex', time: '07:35 AM' },
-        { name: 'DPS School Campus', time: '07:55 AM' }
-      ]),
-      coordinates: JSON.stringify([
-        { lat: 18.7610, lng: 82.9850 },
-        { lat: 18.7650, lng: 82.9910 },
-        { lat: 18.7700, lng: 82.9980 },
-        { lat: 18.7820, lng: 83.0080 }
-      ])
-    }
-  });
 
   // --- 2. ADMIN USER ---
   const adminUser = await prisma.user.create({
@@ -221,9 +177,7 @@ async function main() {
     bloodGroup: 'O+',
     cardQrCode: 'STUDENT:Rahul Mohanty:DPS-2020-4351',
     libraryCardNo: 'LIB-2020-88',
-    parentId: defaultParentProfileId,
-    transportRouteId: route1.id,
-    transportStop: 'Sector 1 Main Chowk'
+    parentId: defaultParentProfileId
   });
 
   // Generate 20 students per class
@@ -291,9 +245,7 @@ async function main() {
         dateOfBirth: new Date(`${birthYear}-05-${10 + Math.floor(Math.random() * 18)}`),
         gender: isBoy ? 'Male' : 'Female',
         address: 'Nalco Township, Damanjodi',
-        parentId: pProfileId,
-        transportRouteId: Math.random() > 0.5 ? route1.id : route2.id,
-        transportStop: Math.random() > 0.5 ? 'Sector 2 Shopping Complex' : 'Hill Top Market Complex'
+        parentId: pProfileId
       });
     }
   }
@@ -401,41 +353,6 @@ async function main() {
   console.log(`Inserting ${gradesToCreate.length} Grade records...`);
   await prisma.grade.createMany({ data: gradesToCreate });
 
-  // --- 7. FEE PAYMENTS ---
-  console.log('Seeding quarterly fees...');
-  const feesToCreate = [];
-  
-  const feeItems = [
-    { title: 'Q1 Tuition & Activities Fee', amount: 15400, due: '2025-04-15', status: 'PAID', paid: '2025-04-10', method: 'UPI', receipt: 'REC-2025-0012' },
-    { title: 'Q2 Tuition & Transport Fee', amount: 18900, due: '2025-07-15', status: 'PAID', paid: '2025-07-12', method: 'CARD', receipt: 'REC-2025-0582' },
-    { title: 'Q3 Tuition Fee', amount: 15400, due: '2025-10-15', status: 'PAID', paid: '2025-10-14', method: 'NET_BANKING', receipt: 'REC-2025-1102' },
-    { title: 'Q4 Tuition & Transport Fee', amount: 18900, due: '2026-01-15', status: 'UNPAID' }
-  ];
-
-  for (const stud of createdStudents) {
-    if (stud.id !== defaultStudentProfileId && Math.random() > 0.3) continue; // Only seed fees for subset to save space
-
-    for (let k = 0; k < feeItems.length; k++) {
-      const item = feeItems[k];
-      const isPaid = item.status === 'PAID';
-
-      feesToCreate.push({
-        id: randomUUID(),
-        studentId: stud.id,
-        title: item.title,
-        amount: item.amount,
-        dueDate: new Date(item.due),
-        status: item.status,
-        paidDate: isPaid ? new Date(item.paid) : null,
-        paymentMethod: isPaid ? item.method : null,
-        transactionId: isPaid ? 'TXN' + Math.floor(10000000 + Math.random() * 90000000) : null,
-        receiptNo: isPaid ? (item.receipt + '-' + stud.id.substring(0, 4)) : null
-      });
-    }
-  }
-
-  console.log(`Inserting ${feesToCreate.length} FeePayment records...`);
-  await prisma.feePayment.createMany({ data: feesToCreate });
 
   // --- 8. LIBRARY BOOKS ---
   console.log('Seeding library books...');
