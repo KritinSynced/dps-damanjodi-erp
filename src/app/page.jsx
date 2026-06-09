@@ -10,9 +10,7 @@ import {
   Compass, Radio, Sparkles
 } from "lucide-react";
 
-// Force dynamic rendering to ensure fresh notices
-export const revalidate = 0;
-
+// Build as static page
 export default async function HomePage() {
   // Fetch live announcements from the DB
   const announcements = await prisma.announcement.findMany({

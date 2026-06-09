@@ -4,8 +4,7 @@ import Footer from "@/components/footer";
 import { prisma } from "@/lib/prisma";
 import { Mail, ShieldCheck, GraduationCap, CalendarDays } from "lucide-react";
 
-export const revalidate = 0;
-
+// Build as static page
 export default async function FacultyPage() {
   // Fetch teachers from the SQLite database
   const dbTeachers = await prisma.teacher.findMany({
