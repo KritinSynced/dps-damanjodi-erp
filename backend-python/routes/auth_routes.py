@@ -88,6 +88,59 @@ def verify_captcha_helper(payload: dict):
     # Clear verified captcha so it cannot be reused
     del temp_captcha_store[captcha_id]
 
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def send_otp_email(to_email: str, otp: str):
+    smtp_host = os.getenv("SMTP_HOST")
+    smtp_port = os.getenv("SMTP_PORT")
+    smtp_user = os.getenv("SMTP_USER")
+    smtp_password = os.getenv("SMTP_PASSWORD")
+    
+    if not (smtp_host and smtp_port and smtp_user and smtp_password):
+        print(f"SMTP credentials not configured. Skipping email dispatch for {to_email}.")
+        return False
+        
+    try:
+        msg = MIMEMultipart()
+        msg["From"] = smtp_user
+        msg["To"] = to_email
+        msg["Subject"] = "DPS Damanjodi ERP - Login Verification OTP"
+        
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; background-color: #f1f5f9; padding: 20px; color: #1e293b;">
+            <div style="max-width: 500px; margin: auto; background-color: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 30px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="color: #0b7a3b; margin: 0;">DPS Damanjodi Portal</h2>
+                    <span style="font-size: 12px; color: #64748b;">Secure Login Verification</span>
+                </div>
+                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 20px;" />
+                <p>Hello,</p>
+                <p>You are attempting to log into the DPS Damanjodi ERP Portal. Use the following One-Time Password (OTP) to complete your verification:</p>
+                <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 15px; text-align: center; margin: 25px 0;">
+                    <span style="font-size: 32px; font-weight: bold; font-family: monospace; letter-spacing: 5px; color: #0f172a;">{otp}</span>
+                </div>
+                <p style="font-size: 12px; color: #64748b; margin-top: 30px;">This code is valid for 5 minutes. If you did not request this login, please ignore this email.</p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        msg.attach(MIMEText(body, "html"))
+        
+        server = smtplib.SMTP(smtp_host, int(smtp_port))
+        server.starttls()
+        server.login(smtp_user, smtp_password)
+        server.sendmail(smtp_user, to_email, msg.as_string())
+        server.quit()
+        print(f"OTP successfully emailed to {to_email}")
+        return True
+    except Exception as e:
+        print(f"Failed to email OTP to {to_email}: {e}")
+        return False
+
 def issue_otp_helper(user: dict) -> dict:
     email = user["email"]
     otp = f"{random.randint(100000, 999999)}"
@@ -103,6 +156,9 @@ def issue_otp_helper(user: dict) -> dict:
     print(f" SECURITY OTP GENERATED FOR {email} ")
     print(f" OTP: {otp} ")
     print("="*50 + "\n")
+    
+    # Try sending email OTP
+    send_otp_email(email, otp)
     
     return {
         "success": True,
