@@ -19,6 +19,7 @@ async function getSessionUser(user: any) {
     role: user.role,
     name: user.name,
     avatar: user.avatar,
+    username: user.username,
   };
 
   if (user.role === "STUDENT") {
@@ -186,6 +187,19 @@ router.post("/register-role", async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: "User already registered" });
     }
 
+    let username: string | null = null;
+    if (role === "STUDENT") {
+      const admissionNo = additionalData.admissionNo || "";
+      username = admissionNo.slice(-4);
+    } else if (role === "TEACHER") {
+      username = additionalData.employeeId || "";
+    } else if (role === "PARENT") {
+      const studentAdmissionNo = additionalData.studentAdmissionNo || "";
+      username = `Parent-${studentAdmissionNo.slice(-4)}`;
+    } else if (role === "ADMIN") {
+      username = additionalData.adminUsername || "";
+    }
+
     // Begin registration transaction
     const newUser = await prisma.$transaction(async (tx) => {
       // 1. Create base user
@@ -196,6 +210,7 @@ router.post("/register-role", async (req: Request, res: Response) => {
           avatar,
           googleId,
           role,
+          username,
         }
       });
 
@@ -316,6 +331,19 @@ router.post("/signup", async (req: Request, res: Response) => {
     // Hash the password
     const passwordHash = await bcrypt.hash(password, 10);
 
+    let username: string | null = null;
+    if (role === "STUDENT") {
+      const admissionNo = additionalData.admissionNo || "";
+      username = admissionNo.slice(-4);
+    } else if (role === "TEACHER") {
+      username = additionalData.employeeId || "";
+    } else if (role === "PARENT") {
+      const studentAdmissionNo = additionalData.studentAdmissionNo || "";
+      username = `Parent-${studentAdmissionNo.slice(-4)}`;
+    } else if (role === "ADMIN") {
+      username = additionalData.adminUsername || "";
+    }
+
     // Begin registration transaction
     const newUser = await prisma.$transaction(async (tx) => {
       // 1. Create base user
@@ -325,6 +353,7 @@ router.post("/signup", async (req: Request, res: Response) => {
           name,
           passwordHash,
           role,
+          username,
         }
       });
 
@@ -428,4 +457,52 @@ router.post("/signup", async (req: Request, res: Response) => {
   }
 });
 
+// 5. Clerk Sync & Login
+router.post("/clerk-sync", async (req: Request, res: Response) => {
+  try {
+    const { email, name, avatar } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ success: false, error: "Email is required for syncing" });
+    }
+
+    let user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user) {
+      // Return requiresRoleSelection to register new user profiles via frontend
+      return res.json({
+        success: true,
+        requiresRoleSelection: true,
+        email,
+        name: name || "New User",
+        avatar: avatar || "",
+        googleId: `clerk_${Date.now()}`
+      });
+    }
+
+    if (!user.avatar && avatar) {
+      user = await prisma.user.update({
+        where: { id: user.id },
+        data: { avatar }
+      });
+    }
+
+    const sessionUser = await getSessionUser(user);
+    const token = jwt.sign(sessionUser, JWT_SECRET, { expiresIn: "7d" });
+
+    return res.json({
+      success: true,
+      requiresRoleSelection: false,
+      token,
+      user: sessionUser
+    });
+  } catch (error: any) {
+    console.error("Clerk Sync API Error:", error);
+    return res.status(500).json({ success: false, error: "Server error during Clerk syncing" });
+  }
+});
+
 export default router;
+

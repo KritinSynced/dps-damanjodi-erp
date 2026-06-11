@@ -32,8 +32,8 @@ export default async function HomePage() {
         {/* Background Image with elegant overlay */}
         <div className="absolute inset-0 z-0">
           <img
-            src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&q=80&w=1600"
-            alt="DPS Damanjodi Campus"
+            src="/hero-campus.jpg"
+            alt="DPS Damanjodi Campus Layout"
             className="w-full h-full object-cover object-center opacity-40 select-none pointer-events-none"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/80 to-transparent"></div>

@@ -12,6 +12,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const { user } = useAuth();
+  const isHome = pathname === "/";
 
   // Scroll handler for shadow & background effect
   useEffect(() => {
@@ -49,19 +50,23 @@ export default function Navbar() {
     return pathname.startsWith(href);
   };
 
+  const isNavbarLight = isScrolled || isOpen || !isHome;
+
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled || isOpen
-          ? "bg-background/95 backdrop-blur-md border-b shadow-sm"
-          : "bg-transparent"
+      className={`z-50 transition-all duration-300 ${
+        isHome
+          ? isScrolled || isOpen
+            ? "fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-md border-b shadow-sm"
+            : "absolute top-0 left-0 right-0 bg-transparent"
+          : "sticky top-0 bg-background border-b shadow-sm"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           {/* Logo Section */}
           <Link href="/" className="flex items-center">
-            <DPSLogo size={52} showText={true} variant={(isScrolled || isOpen) ? "color" : "dark"} />
+            <DPSLogo size={52} showText={true} variant={isNavbarLight ? "color" : "dark"} />
           </Link>
 
           {/* Desktop Navigation */}
@@ -71,7 +76,7 @@ export default function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={`text-sm font-medium transition-colors ${
-                  (isScrolled || isOpen)
+                  isNavbarLight
                     ? isActive(link.href)
                       ? "text-primary border-b-2 border-primary pb-1"
                       : "text-muted-foreground hover:text-primary"
@@ -84,7 +89,7 @@ export default function Navbar() {
               </Link>
             ))}
 
-            <div className={`border-l pl-6 h-6 flex items-center ${(isScrolled || isOpen) ? "border-muted" : "border-slate-800"}`}>
+            <div className={`border-l pl-6 h-6 flex items-center ${isNavbarLight ? "border-muted" : "border-slate-800"}`}>
               {user ? (
                 <Link
                   href={`/portal/${user.role.toLowerCase()}`}
@@ -111,7 +116,7 @@ export default function Navbar() {
             <button
               onClick={() => setIsOpen(!isOpen)}
               className={`focus:outline-none p-2 rounded-md transition-colors ${
-                (isScrolled || isOpen)
+                isNavbarLight
                   ? "text-muted-foreground hover:text-foreground hover:bg-muted"
                   : "text-slate-200 hover:text-white hover:bg-slate-800/40"
               }`}

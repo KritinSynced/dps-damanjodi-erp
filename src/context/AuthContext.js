@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useUser, useAuth as useClerkAuth } from "@clerk/nextjs";
 
 const AuthContext = createContext(undefined);
 
@@ -38,20 +39,57 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const { user: clerkUser, isLoaded: clerkLoaded } = useUser();
+  const { signOut } = useClerkAuth();
 
   useEffect(() => {
-    // Check if session exists in localStorage
-    const savedUser = localStorage.getItem("dps_session");
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (e) {
+    if (!clerkLoaded) return;
+
+    const syncUser = async () => {
+      if (clerkUser) {
+        const email = clerkUser.primaryEmailAddress?.emailAddress;
+        const name = clerkUser.fullName || clerkUser.username || "Clerk User";
+        const avatar = clerkUser.imageUrl;
+
+        try {
+          const response = await fetch("/api/auth/clerk-sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, name, avatar })
+          });
+          const data = await response.json();
+          if (response.ok && data.success) {
+            if (data.requiresRoleSelection) {
+              sessionStorage.setItem("dps_temp_google_auth", JSON.stringify({
+                email: data.email,
+                name: data.name,
+                avatar: data.avatar,
+                googleId: data.googleId
+              }));
+              router.push("/register-role");
+            } else {
+              const sessionUser = data.user;
+              setUser(sessionUser);
+              localStorage.setItem("dps_session", JSON.stringify(sessionUser));
+              localStorage.setItem("dps_token", data.token);
+            }
+          }
+        } catch (error) {
+          console.error("Error syncing clerk user:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setUser(null);
         localStorage.removeItem("dps_session");
         localStorage.removeItem("dps_token");
+        setIsLoading(false);
       }
-    }
-    setIsLoading(false);
-  }, []);
+    };
+
+    syncUser();
+  }, [clerkUser, clerkLoaded, router]);
+
 
   const login = async (email, password, captchaId, captchaAnswer) => {
     setIsLoading(true);
@@ -162,12 +200,16 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
     setUser(null);
     localStorage.removeItem("dps_session");
     localStorage.removeItem("dps_token");
+    if (signOut) {
+      await signOut();
+    }
     router.push("/");
   };
+
 
   return (
     <AuthContext.Provider value={{ user, isAuthenticated: !!user, isLoading, login, loginWithGoogle, verifyOtp, logout }}>

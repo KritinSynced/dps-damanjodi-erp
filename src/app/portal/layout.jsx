@@ -117,9 +117,12 @@ function DesktopSidebarInner({ menu, user, logout, currentTab }) {
         <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-800 border border-slate-700 shrink-0">
           <img src={user.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`} alt={user.name} className="w-full h-full object-cover" />
         </div>
-        <div className="overflow-hidden leading-tight">
+        <div className="overflow-hidden leading-tight flex flex-col gap-0.5">
           <div className="font-bold text-sm text-white truncate">{user.name}</div>
-          <span className="text-[10px] font-bold text-primary uppercase tracking-widest">{user.role} Portal</span>
+          {user.username && (
+            <div className="text-[11px] text-slate-400 font-medium truncate">@{user.username}</div>
+          )}
+          <span className="text-[9px] font-bold text-primary uppercase tracking-widest mt-0.5">{user.role} Portal</span>
         </div>
       </div>
 
@@ -188,6 +191,19 @@ function MobileHeaderInner({ menu, user, logout, currentTab }) {
       {/* Mobile menu drawer */}
       {mobileMenuOpen && (
         <div className="px-2 pt-2 pb-6 space-y-1 border-t border-slate-800 bg-slate-900/95 absolute w-full top-16 left-0 z-40 shadow-lg">
+          {/* Mobile User Info */}
+          <div className="p-3 border-b border-slate-800 flex items-center gap-3 mb-2">
+            <div className="w-9 h-9 rounded-full overflow-hidden bg-slate-800 border border-slate-700 shrink-0">
+              <img src={user.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`} alt={user.name} className="w-full h-full object-cover" />
+            </div>
+            <div className="overflow-hidden leading-tight flex flex-col gap-0.5">
+              <div className="font-bold text-xs text-white truncate">{user.name}</div>
+              {user.username && (
+                <div className="text-[10px] text-slate-400 font-medium truncate">@{user.username}</div>
+              )}
+              <span className="text-[8px] font-bold text-primary uppercase tracking-widest mt-0.5">{user.role} Portal</span>
+            </div>
+          </div>
           {menu.map((item) => (
             <Link
               key={item.tab}

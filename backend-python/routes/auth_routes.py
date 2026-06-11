@@ -38,6 +38,7 @@ def get_session_user(db, user: dict) -> dict:
         "role": user["role"],
         "name": user["name"],
         "avatar": user.get("avatar"),
+        "username": user.get("username"),
     }
     
     role = user["role"]
@@ -315,9 +316,22 @@ def register_role(payload: dict, db = Depends(get_db)):
         if password:
             password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(10)).decode("utf-8")
         
+        username = None
+        if role == "STUDENT":
+            admissionNo = additionalData.get("admissionNo") or ""
+            username = admissionNo[-4:] if len(admissionNo) >= 4 else admissionNo
+        elif role == "TEACHER":
+            username = additionalData.get("employeeId") or ""
+        elif role == "PARENT":
+            studentAdmissionNo = additionalData.get("studentAdmissionNo") or ""
+            last4 = studentAdmissionNo[-4:] if len(studentAdmissionNo) >= 4 else studentAdmissionNo
+            username = f"Parent-{last4}"
+        elif role == "ADMIN":
+            username = additionalData.get("adminUsername") or ""
+
         # Insert base user
-        insert_user = text('INSERT INTO "User" (id, email, "passwordHash", role, name, avatar, "createdAt", "updatedAt", "googleId") '
-                           'VALUES (:id, :email, :passwordHash, :role, :name, :avatar, NOW(), NOW(), :googleId)')
+        insert_user = text('INSERT INTO "User" (id, email, "passwordHash", role, name, avatar, "createdAt", "updatedAt", "googleId", username) '
+                           'VALUES (:id, :email, :passwordHash, :role, :name, :avatar, NOW(), NOW(), :googleId, :username)')
         db.execute(insert_user, {
             "id": user_id,
             "email": email,
@@ -325,7 +339,8 @@ def register_role(payload: dict, db = Depends(get_db)):
             "role": role,
             "name": name,
             "avatar": avatar,
-            "googleId": googleId
+            "googleId": googleId,
+            "username": username
         })
         
         # Create role-specific record
@@ -468,15 +483,29 @@ def signup(payload: dict, db = Depends(get_db)):
     try:
         user_id = str(uuid.uuid4())
         
+        username = None
+        if role == "STUDENT":
+            admissionNo = additionalData.get("admissionNo") or ""
+            username = admissionNo[-4:] if len(admissionNo) >= 4 else admissionNo
+        elif role == "TEACHER":
+            username = additionalData.get("employeeId") or ""
+        elif role == "PARENT":
+            studentAdmissionNo = additionalData.get("studentAdmissionNo") or ""
+            last4 = studentAdmissionNo[-4:] if len(studentAdmissionNo) >= 4 else studentAdmissionNo
+            username = f"Parent-{last4}"
+        elif role == "ADMIN":
+            username = additionalData.get("adminUsername") or ""
+
         # Insert base user
-        insert_user = text('INSERT INTO "User" (id, email, "passwordHash", role, name, "createdAt", "updatedAt") '
-                           'VALUES (:id, :email, :passwordHash, :role, :name, NOW(), NOW())')
+        insert_user = text('INSERT INTO "User" (id, email, "passwordHash", role, name, "createdAt", "updatedAt", username) '
+                           'VALUES (:id, :email, :passwordHash, :role, :name, NOW(), NOW(), :username)')
         db.execute(insert_user, {
             "id": user_id,
             "email": email,
             "passwordHash": password_hash,
             "role": role,
-            "name": name
+            "name": name,
+            "username": username
         })
         
         # Create role-specific record
@@ -595,3 +624,45 @@ def signup(payload: dict, db = Depends(get_db)):
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e) or "Registration failed")
+
+@router.post("/clerk-sync")
+def clerk_sync(payload: dict, db = Depends(get_db)):
+    email = payload.get("email")
+    name = payload.get("name")
+    avatar = payload.get("avatar", "")
+    
+    if not email:
+        raise HTTPException(status_code=400, detail="Email is required for syncing")
+        
+    user_query = text('SELECT * FROM "User" WHERE email = :email')
+    user = db.execute(user_query, {"email": email}).mappings().first()
+    
+    if not user:
+        # Return requiresRoleSelection to register new user profiles via frontend
+        return {
+            "success": True,
+            "requiresRoleSelection": True,
+            "email": email,
+            "name": name or "New User",
+            "avatar": avatar or "",
+            "googleId": f"clerk_{uuid.uuid4().hex[:10]}"
+        }
+        
+    # Sync avatar if it's currently null/empty
+    if not user.get("avatar") and avatar:
+        update_query = text('UPDATE "User" SET avatar = :avatar, "updatedAt" = NOW() WHERE id = :id')
+        db.execute(update_query, {"avatar": avatar, "id": user["id"]})
+        db.commit()
+        # Refetch
+        user = db.execute(user_query, {"email": email}).mappings().first()
+        
+    session_user = get_session_user(db, user)
+    token = create_jwt_token(session_user)
+    
+    return {
+        "success": True,
+        "requiresRoleSelection": False,
+        "token": token,
+        "user": session_user
+    }
+
