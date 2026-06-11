@@ -282,8 +282,12 @@ export default function RegisterRolePage() {
         <div className="bg-white border border-slate-200/80 rounded-xl p-4 flex items-center gap-4 shadow-md text-slate-800">
           <img src={googleData.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${googleData.name}`} alt={googleData.name} className="w-12 h-12 rounded-full border border-slate-200 bg-slate-50" />
           <div>
-            <h4 className="font-bold text-sm text-slate-800">{googleData.name}</h4>
-            <p className="text-xs text-slate-500 font-mono mt-0.5">{googleData.email}</p>
+            <h4 className="font-bold text-sm text-slate-800">
+              {googleData.name === "Clerk User" || googleData.name === "New User" ? googleData.email : googleData.name}
+            </h4>
+            {googleData.name !== "Clerk User" && googleData.name !== "New User" && (
+              <p className="text-xs text-slate-500 font-mono mt-0.5">{googleData.email}</p>
+            )}
           </div>
         </div>
 
