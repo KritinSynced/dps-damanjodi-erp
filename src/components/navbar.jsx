@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { useUser } from "@clerk/nextjs";
 import DPSLogo from "@/components/ui/DPSLogo";
 import { Menu, X, LayoutDashboard, LogIn, ArrowRight } from "lucide-react";
 
@@ -12,6 +13,7 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
   const { user } = useAuth();
+  const { user: clerkUser } = useUser();
   const isHome = pathname === "/";
 
   // Scroll handler for shadow & background effect
@@ -90,9 +92,9 @@ export default function Navbar() {
             ))}
 
             <div className={`border-l pl-6 h-6 flex items-center ${isNavbarLight ? "border-muted" : "border-slate-800"}`}>
-              {user ? (
+              {(user || clerkUser) ? (
                 <Link
-                  href={`/portal/${user.role.toLowerCase()}`}
+                  href={user ? `/portal/${user.role.toLowerCase()}` : "/register-role"}
                   className="inline-flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary-hover px-4 py-2 rounded-md text-sm font-medium transition-all shadow-sm hover:shadow"
                 >
                   <LayoutDashboard size={16} />
@@ -145,9 +147,9 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="pt-4 pb-2 border-t border-muted px-3">
-              {user ? (
+              {(user || clerkUser) ? (
                 <Link
-                  href={`/portal/${user.role.toLowerCase()}`}
+                  href={user ? `/portal/${user.role.toLowerCase()}` : "/register-role"}
                   className="flex w-full items-center justify-center gap-2 bg-primary text-primary-foreground hover:bg-primary-hover py-3 rounded-md text-base font-medium transition-all"
                 >
                   <LayoutDashboard size={18} />
