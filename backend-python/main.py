@@ -8,10 +8,13 @@ from routes.portal_routes import router as portal_router
 app = FastAPI(title="DPS Damanjodi ERP API Server")
 
 # Configure CORS Middleware
+frontend_url = os.getenv("FRONTEND_URL")
 origins = [
     "http://localhost:3000",
     "http://localhost:5000",
 ]
+if frontend_url:
+    origins.append(frontend_url)
 
 app.add_middleware(
     CORSMiddleware,
