@@ -7,7 +7,7 @@ import { prisma } from "../lib/prisma";
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || "dps_damanjodi_erp_secret_key_2026_xyz";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
-const ADMIN_REGISTRATION_KEY = "dps_admin_2026";
+const ADMIN_REGISTRATION_KEY = "6126";
 
 const oAuth2Client = new OAuth2Client(GOOGLE_CLIENT_ID);
 

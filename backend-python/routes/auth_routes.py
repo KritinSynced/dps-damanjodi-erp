@@ -15,7 +15,7 @@ from auth_middleware import JWT_SECRET
 router = APIRouter()
 
 GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID") or ""
-ADMIN_REGISTRATION_KEY = "dps_admin_2026"
+ADMIN_REGISTRATION_KEY = "6126"
 
 # In-memory stores for Captcha and OTP
 temp_captcha_store = {}  # captcha_id -> { "answer": int, "expires_at": datetime }
