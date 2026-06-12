@@ -118,7 +118,9 @@ function DesktopSidebarInner({ menu, user, logout, currentTab }) {
           <img src={user.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`} alt={user.name} className="w-full h-full object-cover" />
         </div>
         <div className="overflow-hidden leading-tight flex flex-col gap-0.5">
-          <div className="font-bold text-sm text-white truncate">{user.name}</div>
+          <div className="font-bold text-sm text-white truncate">
+            {(!user.name || user.name === "Clerk User" || user.name === "New User") && user.username ? user.username : user.name}
+          </div>
           {user.username && (
             <div className="text-[11px] text-slate-400 font-medium truncate">@{user.username}</div>
           )}
@@ -197,7 +199,9 @@ function MobileHeaderInner({ menu, user, logout, currentTab }) {
               <img src={user.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${user.name}`} alt={user.name} className="w-full h-full object-cover" />
             </div>
             <div className="overflow-hidden leading-tight flex flex-col gap-0.5">
-              <div className="font-bold text-xs text-white truncate">{user.name}</div>
+              <div className="font-bold text-xs text-white truncate">
+                {(!user.name || user.name === "Clerk User" || user.name === "New User") && user.username ? user.username : user.name}
+              </div>
               {user.username && (
                 <div className="text-[10px] text-slate-400 font-medium truncate">@{user.username}</div>
               )}
