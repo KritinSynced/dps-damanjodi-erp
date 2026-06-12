@@ -4,7 +4,7 @@ import random
 from datetime import datetime, timedelta
 import bcrypt
 import jwt
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy import text
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -93,7 +93,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
-def send_otp_email(to_email: str, otp: str):
+def send_otp_email(to_email: str, otp: str, frontend_url: str = None):
     smtp_host = os.getenv("SMTP_HOST")
     smtp_port = os.getenv("SMTP_PORT")
     smtp_user = os.getenv("SMTP_USER")
@@ -111,7 +111,8 @@ def send_otp_email(to_email: str, otp: str):
         
         requested_at = datetime.now().strftime("%B %d, %Y at %I:%M %p")
         current_year = datetime.now().year
-        frontend_url = (os.getenv("FRONTEND_URL") or "http://localhost:3000").rstrip("/")
+        if not frontend_url:
+            frontend_url = (os.getenv("FRONTEND_URL") or "http://localhost:3000").rstrip("/")
 
         body = f"""
         <html>
@@ -171,7 +172,7 @@ def send_otp_email(to_email: str, otp: str):
         print(f"Failed to email OTP to {to_email}: {e}")
         return False
 
-def issue_otp_helper(user: dict) -> dict:
+def issue_otp_helper(user: dict, frontend_url: str = None) -> dict:
     email = user["email"]
     otp = f"{random.randint(100000, 999999)}"
     expires_at = datetime.utcnow() + timedelta(minutes=5)
@@ -188,7 +189,7 @@ def issue_otp_helper(user: dict) -> dict:
     print("="*50 + "\n")
     
     # Try sending email OTP
-    send_otp_email(email, otp)
+    send_otp_email(email, otp, frontend_url)
     
     return {
         "success": True,
@@ -216,7 +217,7 @@ def get_captcha():
     }
 
 @router.post("/login")
-def login(payload: dict, db = Depends(get_db)):
+def login(payload: dict, request: Request, db = Depends(get_db)):
     verify_captcha_helper(payload)
     
     email = payload.get("email")
@@ -246,10 +247,13 @@ def login(payload: dict, db = Depends(get_db)):
     if not is_match:
         raise HTTPException(status_code=401, detail="Invalid email or password")
         
-    return issue_otp_helper(user)
+    frontend_url = request.headers.get("origin") or request.headers.get("referer")
+    if frontend_url:
+        frontend_url = frontend_url.rstrip("/")
+    return issue_otp_helper(user, frontend_url)
 
 @router.post("/google")
-def google_auth(payload: dict, db = Depends(get_db)):
+def google_auth(payload: dict, request: Request, db = Depends(get_db)):
     verify_captcha_helper(payload)
     
     credential = payload.get("credential")
@@ -282,7 +286,10 @@ def google_auth(payload: dict, db = Depends(get_db)):
             # Refetch user
             user = db.execute(user_query, {"google_id": google_id, "email": email}).mappings().first()
             
-        return issue_otp_helper(user)
+        frontend_url = request.headers.get("origin") or request.headers.get("referer")
+        if frontend_url:
+            frontend_url = frontend_url.rstrip("/")
+        return issue_otp_helper(user, frontend_url)
     else:
         return {
             "success": True,
