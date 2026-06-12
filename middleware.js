@@ -1,5 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
+export const runtime = 'nodejs';
+
 // Protect portal routes explicitly
 const isPortalRoute = createRouteMatcher([
   '/portal(.*)'
