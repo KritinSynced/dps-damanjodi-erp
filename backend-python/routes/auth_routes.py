@@ -111,21 +111,21 @@ def send_otp_email(to_email: str, otp: str):
         
         requested_at = datetime.now().strftime("%B %d, %Y at %I:%M %p")
         current_year = datetime.now().year
+        frontend_url = (os.getenv("FRONTEND_URL") or "http://localhost:3000").rstrip("/")
 
         body = f"""
         <html>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0f172a; background: linear-gradient(135deg, #05714B 0%, #0EA5E9 100%); padding: 40px 20px; color: #1e293b; margin: 0;">
             <div style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden; font-size: 15px; line-height: 1.6;">
                 
+                <!-- Large Logo Banner Image -->
+                <div style="width: 100%; border-bottom: 1px solid #e2e8f0;">
+                    <img src="{frontend_url}/logo-banner.png" alt="Delhi Public School Damanjodi" style="width: 100%; height: auto; display: block;" />
+                </div>
+
                 <!-- Header Block -->
-                <div style="padding: 40px 32px 20px 32px; text-align: center;">
-                    <!-- Stylized Banner Logo -->
-                    <div style="text-align: center; margin-bottom: 24px;">
-                        <span style="background-color: #05714B; color: #ffffff; padding: 6px 14px; border-radius: 8px; font-weight: bold; font-size: 20px; letter-spacing: 0.5px; display: inline-block; box-shadow: 0 4px 6px rgba(5, 113, 75, 0.2);">DPS</span>
-                        <span style="font-size: 20px; font-weight: bold; color: #111827; letter-spacing: 0.5px; margin-left: 6px; vertical-align: middle;">Damanjodi ERP</span>
-                    </div>
-                    
-                    <h1 style="color: #111827; font-size: 28px; margin: 24px 0 0 0; font-weight: 800; letter-spacing: -0.5px;">Verification Code</h1>
+                <div style="padding: 32px 32px 20px 32px; text-align: center;">
+                    <h1 style="color: #111827; font-size: 28px; margin: 0; font-weight: 800; letter-spacing: -0.5px;">Verification Code</h1>
                     <p style="color: #6B7280; margin: 8px 0 0 0; font-size: 14px;">Secure access to your account</p>
                 </div>
                 
