@@ -109,21 +109,50 @@ def send_otp_email(to_email: str, otp: str):
         msg["To"] = to_email
         msg["Subject"] = "DPS Damanjodi ERP - Login Verification OTP"
         
+        requested_at = datetime.now().strftime("%B %d, %Y at %I:%M %p")
+        current_year = datetime.now().year
+
         body = f"""
         <html>
-        <body style="font-family: Arial, sans-serif; background-color: #f1f5f9; padding: 20px; color: #1e293b;">
-            <div style="max-width: 500px; margin: auto; background-color: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 30px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="color: #0b7a3b; margin: 0;">DPS Damanjodi Portal</h2>
-                    <span style="font-size: 12px; color: #64748b;">Secure Login Verification</span>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #0f172a; background: linear-gradient(135deg, #05714B 0%, #0EA5E9 100%); padding: 40px 20px; color: #1e293b; margin: 0;">
+            <div style="max-width: 600px; margin: auto; background-color: #ffffff; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); overflow: hidden; font-size: 15px; line-height: 1.6;">
+                
+                <!-- Header Block -->
+                <div style="padding: 40px 32px 20px 32px; text-align: center;">
+                    <!-- Stylized Banner Logo -->
+                    <div style="text-align: center; margin-bottom: 24px;">
+                        <span style="background-color: #05714B; color: #ffffff; padding: 6px 14px; border-radius: 8px; font-weight: bold; font-size: 20px; letter-spacing: 0.5px; display: inline-block; box-shadow: 0 4px 6px rgba(5, 113, 75, 0.2);">DPS</span>
+                        <span style="font-size: 20px; font-weight: bold; color: #111827; letter-spacing: 0.5px; margin-left: 6px; vertical-align: middle;">Damanjodi ERP</span>
+                    </div>
+                    
+                    <h1 style="color: #111827; font-size: 28px; margin: 24px 0 0 0; font-weight: 800; letter-spacing: -0.5px;">Verification Code</h1>
+                    <p style="color: #6B7280; margin: 8px 0 0 0; font-size: 14px;">Secure access to your account</p>
                 </div>
-                <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-bottom: 20px;" />
-                <p>Hello,</p>
-                <p>You are attempting to log into the DPS Damanjodi ERP Portal. Use the following One-Time Password (OTP) to complete your verification:</p>
-                <div style="background-color: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 15px; text-align: center; margin: 25px 0;">
-                    <span style="font-size: 32px; font-weight: bold; font-family: monospace; letter-spacing: 5px; color: #0f172a;">{otp}</span>
+                
+                <!-- Content Block -->
+                <div style="padding: 20px 32px 40px 32px; text-align: center;">
+                    <p style="color: #4B5563; margin: 0 0 24px 0;">Enter the verification code below to continue:</p>
+                    
+                    <!-- OTP Box -->
+                    <div style="background-color: #F3F4F6; border-radius: 16px; padding: 24px; margin: 24px 0; display: inline-block; width: 100%; box-sizing: border-box;">
+                        <span style="font-size: 42px; font-weight: 800; color: #05714B; letter-spacing: 8px; font-family: 'Courier New', Courier, monospace; display: block; line-height: 1;">{otp}</span>
+                    </div>
+                    
+                    <p style="font-size: 13px; color: #EF4444; font-weight: 600; margin: 16px 0 0 0; letter-spacing: 0.5px; text-transform: uppercase;">Never share this code with anyone.</p>
                 </div>
-                <p style="font-size: 12px; color: #64748b; margin-top: 30px;">This code is valid for 5 minutes. If you did not request this login, please ignore this email.</p>
+                
+                <!-- Security details footer block -->
+                <div style="background-color: #F9FAFB; padding: 24px 32px; border-top: 1px solid #F3F4F6; text-align: left;">
+                    <p style="font-size: 14px; color: #111827; margin: 0; font-weight: bold;">Didn't request this?</p>
+                    <p style="margin: 8px 0 0 0; font-size: 13px; color: #6B7280; line-height: 1.5;">
+                        This code was requested for <b style="color: #374151;">{to_email}</b> on <b style="color: #374151;">{requested_at}</b>. If this wasn't you, you can safely ignore this email.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Email Footer -->
+            <div style="text-align: center; padding: 24px;">
+                <p style="font-size: 12px; color: #ffffff; margin: 0; opacity: 0.8;">© {current_year} Delhi Public School Damanjodi. All rights reserved.</p>
             </div>
         </body>
         </html>
