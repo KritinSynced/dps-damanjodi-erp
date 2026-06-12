@@ -256,7 +256,7 @@ export default function RegisterRolePage() {
         // Redirect to dashboard
         router.push(`/portal/${selectedRole.toLowerCase()}`);
       } else {
-        setError(data.error || "Failed to complete registration");
+        setError(data.error || data.detail || "Failed to complete registration");
         setIsSubmitting(false);
       }
     } catch (err) {
