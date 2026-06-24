@@ -38,12 +38,12 @@ async function main() {
   console.log('Database cleared. Starting seed execution...');
 
   // 1. ADMIN USER
-  const adminDob = new Date('2000-01-01');
-  const adminHash = await hashPasswordForUser('Super Admin', adminDob);
+  const adminDob = new Date('2006-12-06');
+  const adminHash = await bcrypt.hash('kritin006@06122006', 12);
   const adminUser = await prisma.user.create({
     data: {
       name: 'Super Admin',
-      email: 'admin@dpsdamanjodi.edu.in',
+      email: 'kritin.panda@gmail.com',
       passwordHash: adminHash,
       dateOfBirth: adminDob,
       role: 'ADMIN',
@@ -52,15 +52,15 @@ async function main() {
       address: 'DPS Campus, Damanjodi, Odisha',
     }
   });
-  console.log(`Seeded Admin User: ${adminUser.email} (Password: SuperAdmin@01012000)`);
+  console.log(`Seeded Admin User: ${adminUser.email} (Password: kritin006@06122006)`);
 
   // 2. PRINCIPAL USER
-  const principalDob = new Date('1975-05-15');
-  const principalHash = await hashPasswordForUser('Principal User', principalDob);
+  const principalDob = new Date('2001-01-11');
+  const principalHash = await bcrypt.hash('kritin.yt@11012001', 12);
   const principalUser = await prisma.user.create({
     data: {
       name: 'Principal User',
-      email: 'principal@dpsdamanjodi.edu.in',
+      email: 'kritin.yt@gmail.com',
       passwordHash: principalHash,
       dateOfBirth: principalDob,
       role: 'PRINCIPAL',
@@ -69,15 +69,15 @@ async function main() {
       address: 'Principal Bungalow, DPS Campus, Damanjodi, Odisha',
     }
   });
-  console.log(`Seeded Principal User: ${principalUser.email} (Password: PrincipalUser@15051975)`);
+  console.log(`Seeded Principal User: ${principalUser.email} (Password: kritin.yt@11012001)`);
 
   // 3. TEACHER USER
-  const teacherDob = new Date('1985-08-20');
-  const teacherHash = await hashPasswordForUser('Teacher User', teacherDob);
+  const teacherDob = new Date('2006-06-29');
+  const teacherHash = await bcrypt.hash('smartadi29@29062006', 12);
   const teacherUser = await prisma.user.create({
     data: {
       name: 'Teacher User',
-      email: 'teacher@dpsdamanjodi.edu.in',
+      email: 'smartadi29@gmail.com',
       passwordHash: teacherHash,
       dateOfBirth: teacherDob,
       role: 'TEACHER',
@@ -97,15 +97,15 @@ async function main() {
       joiningDate: new Date('2018-06-01'),
     }
   });
-  console.log(`Seeded Teacher User: ${teacherUser.email} (Password: TeacherUser@20081985)`);
+  console.log(`Seeded Teacher User: ${teacherUser.email} (Password: smartadi29@29062006)`);
 
   // 4. STUDENT USER
-  const studentDob = new Date('2010-12-05');
-  const studentHash = await hashPasswordForUser('Student User', studentDob);
+  const studentDob = new Date('2006-12-06');
+  const studentHash = await bcrypt.hash('teachnobeast00@06122006', 12);
   const studentUser = await prisma.user.create({
     data: {
       name: 'Student User',
-      email: 'student@dpsdamanjodi.edu.in',
+      email: 'teachnobeast006@gmail.com',
       passwordHash: studentHash,
       dateOfBirth: studentDob,
       role: 'STUDENT',
@@ -127,15 +127,15 @@ async function main() {
       parentEmail: 'ramesh.mohanty@gmail.com',
     }
   });
-  console.log(`Seeded Student User: ${studentUser.email} (Password: StudentUser@05122010)`);
+  console.log(`Seeded Student User: ${studentUser.email} (Password: teachnobeast00@06122006)`);
 
   // 5. CLERK USER
-  const clerkDob = new Date('1990-03-25');
-  const clerkHash = await hashPasswordForUser('Clerk User', clerkDob);
+  const clerkDob = new Date('2006-06-29');
+  const clerkHash = await bcrypt.hash('adishreepanda29@29062006', 12);
   const clerkUser = await prisma.user.create({
     data: {
       name: 'Clerk User',
-      email: 'clerk@dpsdamanjodi.edu.in',
+      email: 'adishreepanda29@gmail.com',
       passwordHash: clerkHash,
       dateOfBirth: clerkDob,
       role: 'CLERK',
@@ -144,15 +144,15 @@ async function main() {
       address: 'NALCO Township Sector 1, Damanjodi, Odisha',
     }
   });
-  console.log(`Seeded Clerk User: ${clerkUser.email} (Password: ClerkUser@25031990)`);
+  console.log(`Seeded Clerk User: ${clerkUser.email} (Password: adishreepanda29@29062006)`);
 
   // 6. PEON USER
-  const peonDob = new Date('1988-11-10');
-  const peonHash = await hashPasswordForUser('Peon User', peonDob);
+  const peonDob = new Date('2005-08-16');
+  const peonHash = await bcrypt.hash('janmajay9877@16082005', 12);
   const peonUser = await prisma.user.create({
     data: {
       name: 'Peon User',
-      email: 'peon@dpsdamanjodi.edu.in',
+      email: 'janmajay9877@gmail.com',
       passwordHash: peonHash,
       dateOfBirth: peonDob,
       role: 'PEON',
@@ -161,15 +161,15 @@ async function main() {
       address: 'Peon quarters, Sector 3, Damanjodi, Odisha',
     }
   });
-  console.log(`Seeded Peon User: ${peonUser.email} (Password: PeonUser@10111988)`);
+  console.log(`Seeded Peon User: ${peonUser.email} (Password: janmajay9877@16082005)`);
 
   // 7. SECURITY GUARD USER
-  const guardDob = new Date('1986-07-04');
-  const guardHash = await hashPasswordForUser('Guard User', guardDob);
+  const guardDob = new Date('2007-02-26');
+  const guardHash = await bcrypt.hash('anirudhdash143@26022007', 12);
   const guardUser = await prisma.user.create({
     data: {
       name: 'Guard User',
-      email: 'guard@dpsdamanjodi.edu.in',
+      email: 'anirudhdash143@gmail.com',
       passwordHash: guardHash,
       dateOfBirth: guardDob,
       role: 'SECURITY_GUARD',
@@ -178,7 +178,7 @@ async function main() {
       address: 'Security Barracks, DPS Gate, Damanjodi, Odisha',
     }
   });
-  console.log(`Seeded Security Guard User: ${guardUser.email} (Password: GuardUser@04071986)`);
+  console.log(`Seeded Security Guard User: ${guardUser.email} (Password: anirudhdash143@26022007)`);
 
   // --- SEED SUPPORTING METADATA RECORDS ---
 
