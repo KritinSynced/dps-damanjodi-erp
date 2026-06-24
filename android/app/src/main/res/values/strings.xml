@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">DPS Damanjodi ERP</string>
+    <string name="title_activity_main">DPS Damanjodi ERP</string>
+    <string name="package_name">com.dps.damanjodi.erp</string>
+    <string name="custom_url_scheme">com.dps.damanjodi.erp</string>
+</resources>

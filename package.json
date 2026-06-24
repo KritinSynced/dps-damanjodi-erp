@@ -1,0 +1,41 @@
+{
+  "name": "dps-damanjodi-erp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "postinstall": "node prisma-prebuild.js && prisma generate"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.4.0",
+    "@prisma/client": "6.2.1",
+    "@tailwindcss/postcss": "^4",
+    "@types/three": "^0.184.1",
+    "bcryptjs": "^3.0.3",
+    "framer-motion": "^12.40.0",
+    "lucide-react": "^1.17.0",
+    "next": "16.2.7",
+    "prisma": "6.2.1",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "recharts": "^3.8.1",
+    "tailwindcss": "^4",
+    "three": "^0.184.0"
+  },
+  "devDependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/cli": "^8.4.0",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.7",
+    "typescript": "^5"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  }
+}

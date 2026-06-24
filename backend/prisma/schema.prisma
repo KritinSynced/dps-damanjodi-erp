@@ -1,0 +1,206 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  STUDENT
+  TEACHER
+  ADMIN
+  CLERK
+  PEON
+  SECURITY_GUARD
+  PRINCIPAL
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  dateOfBirth   DateTime
+  role          Role
+  profileImage  String?
+  phone         String?
+  address       String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  studentProfile StudentProfile?
+  teacherProfile TeacherProfile?
+  otpRecords     OtpRecord[]
+  loginAttempts  LoginAttempt[]
+  auditLogs      AuditLog[]
+  announcements  Announcement[]
+  leaveRequests  LeaveRequest[]
+  dutySchedules  DutySchedule[]
+  visitorLogs    VisitorLog[]
+}
+
+model StudentProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  class        String
+  section      String
+  rollNumber   String
+  admissionNo  String   @unique
+  parentName   String
+  parentPhone  String
+  parentEmail  String?
+
+  // Relations
+  attendance Attendance[]
+  grades     Grade[]
+  bookIssues BookIssue[]
+}
+
+model TeacherProfile {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employeeId   String   @unique
+  department   String
+  subjects     String[]
+  qualification String
+  joiningDate  DateTime
+}
+
+model OtpRecord {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  otpHash   String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  email     String
+  success   Boolean
+  ip        String?
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String
+  actor     User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  action    String
+  target    String?
+  metadata  Json?
+  createdAt DateTime @default(now())
+}
+
+model Attendance {
+  id               String         @id @default(cuid())
+  studentProfileId String
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  date             DateTime
+  status           String         // "PRESENT" | "ABSENT" | "LATE" | "HALF_DAY"
+  subject          String         @default("")
+  markedById       String?
+
+  @@unique([studentProfileId, date, subject])
+}
+
+model Grade {
+  id               String         @id @default(cuid())
+  studentProfileId String
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  subject          String         // e.g. "Mathematics", "Science"
+  examType         String         // "UNIT_1" | "UNIT_2" | "MID_TERM" | "FINAL"
+  theoryMarks      Float
+  practicalMarks   Float          @default(0.0)
+  totalMarks       Float
+  maxMarks         Float
+  grade            String         // "A1" | "A2" | "B1" etc.
+  term             String         // "Term 1" | "Term 2"
+  academicYear     String         // e.g. "2025-2026"
+  createdAt        DateTime       @default(now())
+}
+
+model Book {
+  id              String      @id @default(cuid())
+  title           String
+  author          String
+  isbn            String      @unique
+  category        String      // e.g. "Science", "Literature"
+  totalCopies     Int
+  availableCopies Int
+  location        String      // Shelf location, e.g. "A-12"
+  
+  bookIssues      BookIssue[]
+}
+
+model BookIssue {
+  id               String         @id @default(cuid())
+  bookId           String
+  book             Book           @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  studentProfileId String
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  issueDate        DateTime       @default(now())
+  dueDate          DateTime
+  returnDate       DateTime?
+  status           String         // "ISSUED" | "RETURNED" | "OVERDUE"
+  fineAmount       Float          @default(0.0)
+}
+
+model Announcement {
+  id         String    @id @default(cuid())
+  title      String
+  content    String
+  targetRole String    // "ALL" | "STUDENT" | "TEACHER" etc.
+  category   String    // "ACADEMIC" | "EVENT" | "GENERAL" | "URGENT"
+  date       DateTime  @default(now())
+  endDate    DateTime?
+  authorId   String
+  author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model LeaveRequest {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  startDate   DateTime
+  endDate     DateTime
+  reason      String
+  status      String   // "PENDING" | "APPROVED" | "REJECTED"
+  comments    String?
+  appliedDate DateTime @default(now())
+}
+
+model DutySchedule {
+  id        String   @id @default(cuid())
+  peonId    String
+  peon      User     @relation(fields: [peonId], references: [id], onDelete: Cascade)
+  task      String
+  location  String
+  timeSlot  String   // e.g. "08:00 AM - 10:00 AM"
+  status    String   // "PENDING" | "COMPLETED"
+  date      DateTime
+  createdAt DateTime @default(now())
+}
+
+model VisitorLog {
+  id            String    @id @default(cuid())
+  guardId       String
+  guard         User      @relation(fields: [guardId], references: [id], onDelete: Cascade)
+  visitorName   String
+  visitorPhone  String
+  purpose       String
+  vehicleNumber String?
+  checkInTime   DateTime  @default(now())
+  checkOutTime  DateTime?
+  createdAt     DateTime  @default(now())
+}
