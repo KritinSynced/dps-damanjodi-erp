@@ -4,7 +4,6 @@ import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import SplashLoader from "@/components/ui/SplashLoader";
 import AndroidRedirect from "@/components/AndroidRedirect";
-import SchoolCrest from "@/components/3d/SchoolCrest";
 import { prisma } from "@/lib/prisma";
 import { 
   ArrowRight, Calendar, Award, BookOpen, Clock, 
@@ -59,7 +58,7 @@ export default async function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-white w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Column 1: Info */}
-            <div className="lg:col-span-7 space-y-6 text-left">
+            <div className="lg:col-span-12 space-y-6 text-center flex flex-col items-center justify-center">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/20 text-primary border border-primary/30">
                 <Sparkles size={12} className="text-secondary" /> Set up under the aegis of the DPS Society
               </span>
@@ -67,11 +66,11 @@ export default async function HomePage() {
                 Nurturing Minds, <br />
                 <span className="text-secondary">Shaping Futures</span>
               </h1>
-              <p className="text-slate-300 text-lg sm:text-xl leading-relaxed">
+              <p className="text-slate-300 text-lg sm:text-xl leading-relaxed max-w-3xl">
                 Delhi Public School, Damanjodi provides a holistic educational environment 
                 in collaboration with NALCO, inspiring excellence in academics, sports, and character.
               </p>
-              <div className="flex flex-wrap gap-4 pt-4">
+              <div className="flex flex-wrap gap-4 pt-4 justify-center">
                 <Link
                   href="/admissions"
                   className="inline-flex items-center gap-2 bg-primary text-white hover:bg-primary-hover px-6 py-3.5 rounded-md text-base font-semibold transition-all shadow-lg shadow-primary/20"
@@ -86,11 +85,6 @@ export default async function HomePage() {
                   Explore Campus
                 </Link>
               </div>
-            </div>
-
-            {/* Column 2: 3D School Crest */}
-            <div className="lg:col-span-5 flex justify-center items-center">
-              <SchoolCrest />
             </div>
           </div>
         </div>
