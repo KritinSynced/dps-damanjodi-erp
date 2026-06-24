@@ -101,11 +101,11 @@ async function main() {
 
   // 4. STUDENT USER
   const studentDob = new Date('2006-12-06');
-  const studentHash = await bcrypt.hash('teachnobeast00@06122006', 12);
+  const studentHash = await bcrypt.hash('technobeast00@06122006', 12);
   const studentUser = await prisma.user.create({
     data: {
       name: 'Student User',
-      email: 'teachnobeast006@gmail.com',
+      email: 'technobeast006@gmail.com',
       passwordHash: studentHash,
       dateOfBirth: studentDob,
       role: 'STUDENT',
@@ -127,7 +127,7 @@ async function main() {
       parentEmail: 'ramesh.mohanty@gmail.com',
     }
   });
-  console.log(`Seeded Student User: ${studentUser.email} (Password: teachnobeast00@06122006)`);
+  console.log(`Seeded Student User: ${studentUser.email} (Password: technobeast00@06122006)`);
 
   // 5. CLERK USER
   const clerkDob = new Date('2006-06-29');
