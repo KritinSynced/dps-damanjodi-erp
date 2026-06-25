@@ -464,7 +464,7 @@ router.post("/admin/users", async (req: Request, res: Response) => {
             userId: user.id,
             employeeId,
             department,
-            subjects: subjects || [],
+            subjects: Array.isArray(subjects) ? subjects.join(',') : (subjects || ""),
             qualification,
             joiningDate: new Date()
           }
@@ -576,7 +576,9 @@ router.put("/admin/users/:id", async (req: Request, res: Response) => {
         const teacherData: any = {};
         if (employeeId !== undefined) teacherData.employeeId = employeeId;
         if (department !== undefined) teacherData.department = department;
-        if (subjects !== undefined) teacherData.subjects = subjects;
+        if (subjects !== undefined) {
+          teacherData.subjects = Array.isArray(subjects) ? subjects.join(',') : subjects;
+        }
         if (qualification !== undefined) teacherData.qualification = qualification;
 
         await tx.teacherProfile.upsert({
@@ -586,7 +588,7 @@ router.put("/admin/users/:id", async (req: Request, res: Response) => {
             userId: targetUserId,
             employeeId: employeeId || `DPS-T-${Math.floor(100+Math.random()*900)}`,
             department: department || "Science",
-            subjects: subjects || [],
+            subjects: Array.isArray(subjects) ? subjects.join(',') : (subjects || ""),
             qualification: qualification || "B.Ed",
             joiningDate: new Date()
           }

@@ -19,7 +19,15 @@ if (fs.existsSync(schemaPath)) {
     );
     fs.writeFileSync(schemaPath, schema, 'utf8');
   } else {
-    console.log('Prisma Prebuild: Using default SQLite provider configuration.');
+    console.log('Prisma Prebuild: Using default SQLite provider configuration. Rewriting schema.prisma for SQLite...');
+    schema = schema.replace(
+      /datasource db \{[\s\S]*?\}/,
+      `datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}`
+    );
+    fs.writeFileSync(schemaPath, schema, 'utf8');
   }
 } else {
   console.log('Prisma Prebuild: prisma/schema.prisma not found.');

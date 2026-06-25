@@ -5,7 +5,7 @@ async function main() {
   const users = await prisma.user.findMany({
     where: {
       role: {
-        in: ['ADMIN', 'PRINCIPAL', 'TEACHER', 'CLERK', 'ALUMNI']
+        in: ['ADMIN', 'PRINCIPAL', 'TEACHER', 'CLERK']
       }
     },
     select: {
@@ -13,9 +13,7 @@ async function main() {
       email: true,
       role: true,
       name: true,
-      passwordHash: true,
-      isFirstLogin: true,
-      clerkUserId: true
+      passwordHash: true
     }
   });
   console.log('Seeded Staff/Admin/Alumni/Clerk Users:');

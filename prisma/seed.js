@@ -10,14 +10,14 @@ async function hashPasswordForUser(name, dobDate) {
   const month = String(dobDate.getMonth() + 1).padStart(2, '0');
   const year = dobDate.getFullYear();
   const rawPassword = `${cleanName}@${day}${month}${year}`;
-  
+
   // Return bcrypt hash
   return bcrypt.hash(rawPassword, 12);
 }
 
 async function main() {
   console.log('Clearing existing database records...');
-  
+
   // Delete in order to satisfy foreign key constraints
   await prisma.otpRecord.deleteMany({});
   await prisma.loginAttempt.deleteMany({});
@@ -30,7 +30,7 @@ async function main() {
   await prisma.leaveRequest.deleteMany({});
   await prisma.dutySchedule.deleteMany({});
   await prisma.visitorLog.deleteMany({});
-  
+
   await prisma.studentProfile.deleteMany({});
   await prisma.teacherProfile.deleteMany({});
   await prisma.user.deleteMany({});
@@ -72,12 +72,12 @@ async function main() {
   console.log(`Seeded Principal User: ${principalUser.email} (Password: kritin.yt@11012001)`);
 
   // 3. TEACHER USER
-  const teacherDob = new Date('2006-06-29');
-  const teacherHash = await bcrypt.hash('smartadi29@29062006', 12);
+  const teacherDob = new Date('1978-11-01');
+  const teacherHash = await bcrypt.hash('janmajaya0001@01111978', 12);
   const teacherUser = await prisma.user.create({
     data: {
       name: 'Teacher User',
-      email: 'smartadi29@gmail.com',
+      email: 'janmajaya0001@gmail.com',
       passwordHash: teacherHash,
       dateOfBirth: teacherDob,
       role: 'TEACHER',
@@ -92,12 +92,12 @@ async function main() {
       userId: teacherUser.id,
       employeeId: 'DPS-T-101',
       department: 'Science',
-      subjects: ['Physics', 'Chemistry'],
+      subjects: 'Physics,Chemistry',
       qualification: 'M.Sc (Physics), B.Ed',
       joiningDate: new Date('2018-06-01'),
     }
   });
-  console.log(`Seeded Teacher User: ${teacherUser.email} (Password: smartadi29@29062006)`);
+  console.log(`Seeded Teacher User: ${teacherUser.email} (Password: janmajaya0001@01111978)`);
 
   // 4. STUDENT USER
   const studentDob = new Date('2006-12-06');
@@ -220,7 +220,7 @@ async function main() {
   for (let i = 0; i < 15; i++) {
     const currentDate = new Date(baseDate);
     currentDate.setDate(baseDate.getDate() + i);
-    
+
     // Skip sundays (day 0)
     if (currentDate.getDay() === 0) continue;
 
